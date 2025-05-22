@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Briefcase, Building, MapPin, Users, ArrowRight, Sparkles, Star, TrendingUp, Award } from 'lucide-react';
 
+
 const Home = () => {
   // Featured jobs - normally would come from an API
   const featuredJobs = [
