@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Portal API Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .api-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .endpoint {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+        }
+        .method {
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 3px;
+            color: white;
+        }
+        .get { background-color: #28a745; }
+        .post { background-color: #007bff; }
+        .put { background-color: #fd7e14; }
+        .delete { background-color: #dc3545; }
+        .patch { background-color: #6f42c1; }
+        .auth-required {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .request-body, .response {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        pre {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .example-token {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .response-example {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .curl-example {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Career Portal API Documentation</h1>
+        
+        <div class="api-section">
+            <h2>Authentication</h2>
+            <p>Base URL: <code>http://localhost:5000/api</code></p>
+            <p>Most endpoints require authentication using JWT token in the Authorization header:</p>
+            <pre>Authorization: Bearer &lt;your_token&gt;</pre>
+            
+            <div class="example-token">
+                <h4>Test Token Examples:</h4>
+                <p>User Token: <code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTYiLCJyb2xlIjoidXNlciJ9.example_user_token</code></p>
+                <p>Admin Token: <code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3ODkwMTIiLCJyb2xlIjoiYWRtaW4ifQ.example_admin_token</code></p>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2>User Routes</h2>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/users/signup</code>
+                <p>Register a new user</p>
+                <div class="request-body">
+                    <h4>Request Body:</h4>
+                    <pre>{
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "SecurePass123!",
+    "phone": "+91 9876543210",
+    "address": "123 Main Street, Mumbai, India"
+}</pre>
+                </div>
+                <div class="response-example">
+                    <h4>Response (201 Created):</h4>
+                    <pre>{
+    "success": true,
+    "message": "User registered successfully",
+    "data": {
+        "userId": "123456",
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/users/login</code>
+                <p>Login user</p>
+                <div class="request-body">
+                    <h4>Request Body:</h4>
+                    <pre>{
+    "email": "john.doe@example.com",
+    "password": "SecurePass123!"
+}</pre>
+                </div>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "message": "Login successful",
+    "data": {
+        "userId": "123456",
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/users/profile</code>
+                <p class="auth-required">Authentication Required</p>
+                <p>Get user profile information</p>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "data": {
+        "userId": "123456",
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "phone": "+91 9876543210",
+        "address": "123 Main Street, Mumbai, India",
+        "createdAt": "2024-03-15T10:30:00Z"
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method patch">PATCH</span>
+                <code>/api/users/profile</code>
+                <p class="auth-required">Authentication Required</p>
+                <p>Update user profile</p>
+                <div class="request-body">
+                    <h4>Request Body:</h4>
+                    <pre>{
+    "name": "John Doe Updated",
+    "email": "john.updated@example.com",
+    "phone": "+91 9876543211",
+    "address": "456 New Street, Delhi, India"
+}</pre>
+                </div>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "message": "Profile updated successfully",
+    "data": {
+        "userId": "123456",
+        "name": "John Doe Updated",
+        "email": "john.updated@example.com",
+        "phone": "+91 9876543211",
+        "address": "456 New Street, Delhi, India"
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/users/change-password</code>
+                <p class="auth-required">Authentication Required</p>
+                <p>Change user password</p>
+                <div class="request-body">
+                    <h4>Request Body:</h4>
+                    <pre>{
+    "currentPassword": "SecurePass123!",
+    "newPassword": "NewSecurePass456!"
+}</pre>
+                </div>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "message": "Password changed successfully"
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/users/deactivate</code>
+                <p class="auth-required">Authentication Required</p>
+                <p>Deactivate user account</p>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "message": "Account deactivated successfully"
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2>Admin Routes</h2>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/admin/register</code>
+                <p>Register a new admin</p>
+                <div class="request-body">
+                    <h4>Request Body:</h4>
+                    <pre>{
+    "name": "Admin User",
+    "email": "admin@careerportal.com",
+    "password": "AdminPass123!"
+}</pre>
+                </div>
+                <div class="response-example">
+                    <h4>Response (201 Created):</h4>
+                    <pre>{
+    "success": true,
+    "message": "Admin registered successfully",
+    "data": {
+        "adminId": "789012",
+        "name": "Admin User",
+        "email": "admin@careerportal.com",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/admin/login</code>
+                <p>Login admin</p>
+                <div class="request-body">
+                    <h4>Request Body:</h4>
+                    <pre>{
+    "email": "admin@careerportal.com",
+    "password": "AdminPass123!"
+}</pre>
+                </div>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "message": "Admin login successful",
+    "data": {
+        "adminId": "789012",
+        "name": "Admin User",
+        "email": "admin@careerportal.com",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/admin/profile</code>
+                <p class="auth-required">Admin Authentication Required</p>
+                <p>Get admin profile information</p>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "data": {
+        "adminId": "789012",
+        "name": "Admin User",
+        "email": "admin@careerportal.com",
+        "createdAt": "2024-03-15T09:00:00Z"
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/admin/dashboard</code>
+                <p class="auth-required">Admin Authentication Required</p>
+                <p>Get admin dashboard statistics</p>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "data": {
+        "stats": {
+            "totalUsers": 150,
+            "totalAdmins": 5,
+            "activeUsers": 145,
+            "inactiveUsers": 5
+        }
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/admin/users</code>
+                <p class="auth-required">Admin Authentication Required</p>
+                <p>Get all users</p>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "data": [
+        {
+            "userId": "123456",
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "phone": "+91 9876543210",
+            "address": "123 Main Street, Mumbai, India",
+            "isActive": true,
+            "createdAt": "2024-03-15T10:30:00Z"
+        },
+        // ... more users
+    ]
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/admin/users/:id</code>
+                <p class="auth-required">Admin Authentication Required</p>
+                <p>Get user by ID</p>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "data": {
+        "userId": "123456",
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "phone": "+91 9876543210",
+        "address": "123 Main Street, Mumbai, India",
+        "isActive": true,
+        "createdAt": "2024-03-15T10:30:00Z"
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method patch">PATCH</span>
+                <code>/api/admin/users/:id</code>
+                <p class="auth-required">Admin Authentication Required</p>
+                <p>Update user information</p>
+                <div class="request-body">
+                    <h4>Request Body:</h4>
+                    <pre>{
+    "name": "John Doe Updated",
+    "email": "john.updated@example.com",
+    "role": "User",
+    "isActive": true,
+    "phone": "+91 9876543211",
+    "address": "456 New Street, Delhi, India"
+}</pre>
+                </div>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "message": "User updated successfully",
+    "data": {
+        "userId": "123456",
+        "name": "John Doe Updated",
+        "email": "john.updated@example.com",
+        "role": "User",
+        "isActive": true,
+        "phone": "+91 9876543211",
+        "address": "456 New Street, Delhi, India"
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <code>/api/admin/users/:id</code>
+                <p class="auth-required">Admin Authentication Required</p>
+                <p>Delete a user</p>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "message": "User deleted successfully"
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2>Job Routes</h2>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/jobs</code>
+                <p>Get all jobs</p>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "data": [
+        {
+            "jobId": "JOB123",
+            "title": "Senior Software Engineer",
+            "description": "Looking for an experienced software engineer...",
+            "requirements": "5+ years of experience, Node.js, React",
+            "location": "Bangalore, India",
+            "salary": "₹15,00,000 - ₹25,00,000",
+            "type": "Full-time",
+            "createdAt": "2024-03-15T11:00:00Z"
+        },
+        // ... more jobs
+    ]
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/jobs/:id</code>
+                <p>Get job by ID</p>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "data": {
+        "jobId": "JOB123",
+        "title": "Senior Software Engineer",
+        "description": "Looking for an experienced software engineer...",
+        "requirements": "5+ years of experience, Node.js, React",
+        "location": "Bangalore, India",
+        "salary": "₹15,00,000 - ₹25,00,000",
+        "type": "Full-time",
+        "createdAt": "2024-03-15T11:00:00Z"
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/jobs</code>
+                <p class="auth-required">Admin Authentication Required</p>
+                <p>Create a new job posting</p>
+                <div class="request-body">
+                    <h4>Request Body:</h4>
+                    <pre>{
+    "title": "Senior Software Engineer",
+    "description": "Looking for an experienced software engineer...",
+    "requirements": "5+ years of experience, Node.js, React",
+    "location": "Bangalore, India",
+    "salary": "₹15,00,000 - ₹25,00,000",
+    "type": "Full-time"
+}</pre>
+                </div>
+                <div class="response-example">
+                    <h4>Response (201 Created):</h4>
+                    <pre>{
+    "success": true,
+    "message": "Job created successfully",
+    "data": {
+        "jobId": "JOB123",
+        "title": "Senior Software Engineer",
+        "createdAt": "2024-03-15T11:00:00Z"
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method put">PUT</span>
+                <code>/api/jobs/:id</code>
+                <p class="auth-required">Admin Authentication Required</p>
+                <p>Update a job posting</p>
+                <div class="request-body">
+                    <h4>Request Body:</h4>
+                    <pre>{
+    "title": "Senior Software Engineer - Updated",
+    "description": "Updated job description...",
+    "requirements": "Updated requirements...",
+    "location": "Hyderabad, India",
+    "salary": "₹20,00,000 - ₹30,00,000",
+    "type": "Full-time"
+}</pre>
+                </div>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "message": "Job updated successfully",
+    "data": {
+        "jobId": "JOB123",
+        "title": "Senior Software Engineer - Updated",
+        "updatedAt": "2024-03-15T12:00:00Z"
+    }
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <code>/api/jobs/:id</code>
+                <p class="auth-required">Admin Authentication Required</p>
+                <p>Delete a job posting</p>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "message": "Job deleted successfully"
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/jobs/admin/jobs</code>
+                <p class="auth-required">Admin Authentication Required</p>
+                <p>Get all jobs (admin view)</p>
+                <div class="response-example">
+                    <h4>Response (200 OK):</h4>
+                    <pre>{
+    "success": true,
+    "data": [
+        {
+            "jobId": "JOB123",
+            "title": "Senior Software Engineer",
+            "description": "Looking for an experienced software engineer...",
+            "requirements": "5+ years of experience, Node.js, React",
+            "location": "Bangalore, India",
+            "salary": "₹15,00,000 - ₹25,00,000",
+            "type": "Full-time",
+            "createdAt": "2024-03-15T11:00:00Z",
+            "applications": 5,
+            "status": "active"
+        },
+        // ... more jobs with admin details
+    ]
+}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

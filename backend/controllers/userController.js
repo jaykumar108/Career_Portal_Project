@@ -1,0 +1,151 @@
+const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+
+// Generate JWT Token
+const generateToken = (userId) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: '7d'
+  });
+};
+
+// User Signup
+const signup = async (req, res) => {
+  try {
+    const { name, email, password, phone } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // Create new user
+    const user = new User({
+      name,
+      email,
+      password,
+      phone
+    });
+
+    await user.save();
+
+    // Generate token
+    const token = generateToken(user._id);
+
+    res.status(201).json({
+      message: 'User registered successfully',
+      token,
+      user: user.getPublicProfile()
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// User Login
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Check if user is active
+    if (!user.isActive) {
+      return res.status(401).json({ message: 'Account is deactivated' });
+    }
+
+    // Verify password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Generate token
+    const token = generateToken(user._id);
+
+    res.json({
+      message: 'Login successful',
+      token,
+      user: user.getPublicProfile()
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Get User Profile
+const getProfile = async (req, res) => {
+  try {
+    res.json(req.user.getPublicProfile());
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Update User Profile
+const updateProfile = async (req, res) => {
+  const updates = Object.keys(req.body);
+  const allowedUpdates = ['name', 'phone', 'address', 'education', 'experience', 'skills', 'resume'];
+  const isValidOperation = updates.every(update => allowedUpdates.includes(update));
+
+  if (!isValidOperation) {
+    return res.status(400).json({ message: 'Invalid updates' });
+  }
+
+  try {
+    updates.forEach(update => req.user[update] = req.body[update]);
+    await req.user.save();
+    res.json(req.user.getPublicProfile());
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Change Password
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Verify current password
+    const isMatch = await req.user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect' });
+    }
+
+    // Update password
+    req.user.password = newPassword;
+    await req.user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Deactivate Account
+const deactivateAccount = async (req, res) => {
+  try {
+    req.user.isActive = false;
+    await req.user.save();
+    res.json({ message: 'Account deactivated successfully' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  signup,
+  login,
+  getProfile,
+  updateProfile,
+  changePassword,
+  deactivateAccount
+}; 
