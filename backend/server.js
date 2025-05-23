@@ -12,7 +12,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'https://career-portal-project.vercel.app',
+    origin: process.env.FRONTEND_URL || '*',
     credentials: true
 }));
 app.use(express.json());
@@ -54,20 +54,12 @@ const createDefaultAdmin = async () => {
     }
 };
 
-// MongoDB Connection and Server Start
+// MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
     .then(async () => {
         console.log('Connected to MongoDB');
         // Create default admin after successful connection
         await createDefaultAdmin();
-        
-        // Start server only if not in production (Vercel)
-        if (process.env.NODE_ENV !== 'production') {
-            const PORT = process.env.PORT || 5000;
-            app.listen(PORT, () => {
-                console.log(`Server is running on port ${PORT}`);
-            });
-        }
     })
     .catch((err) => {
         console.error('MongoDB connection error:', err);
