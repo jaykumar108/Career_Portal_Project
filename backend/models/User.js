@@ -27,7 +27,8 @@ const userSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    trim: true
+    trim: true,
+    required: [true, 'Phone number is required']
   },
   address: {
     street: String,
@@ -64,6 +65,9 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Drop existing indexes
+userSchema.index({ email: 1 }, { unique: true });
+
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
@@ -95,5 +99,14 @@ userSchema.methods.getPublicProfile = function() {
 };
 
 const User = mongoose.model('User', userSchema);
+
+// Drop the username index if it exists
+User.collection.dropIndex('username_1', function(err) {
+  if (err) {
+    console.log('Index drop error:', err);
+  } else {
+    console.log('Username index dropped successfully');
+  }
+});
 
 module.exports = User; 
