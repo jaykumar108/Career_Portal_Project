@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
 
   // Create axios instance with base URL
   const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL,
+    baseURL: 'http://localhost:5000/api',
     headers: {
       'Content-Type': 'application/json'
     }
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, mobile) => {
     try {
       setError(null);
-      const response = await api.post('/api/users/signup', {
+      const response = await api.post('/users/signup', {
         name,
         email,
         password,
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null);
-      const response = await api.post('/api/users/login', {
+      const response = await api.post('/users/login', {
         email,
         password
       });
@@ -119,7 +119,7 @@ export const AuthProvider = ({ children }) => {
   const adminLogin = async (email, password) => {
     try {
       setError(null);
-      const response = await api.post('/api/admin/login', {
+      const response = await api.post('/admin/login', {
         email,
         password
       });
