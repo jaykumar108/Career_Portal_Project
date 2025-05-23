@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, mobile) => {
     try {
       setError(null);
-      const response = await api.post('/users/signup', {
+      const response = await api.post('/api/users/signup', {
         name,
         email,
         password,
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null);
-      const response = await api.post('/users/login', {
+      const response = await api.post('/api/users/login', {
         email,
         password
       });
@@ -119,7 +119,7 @@ export const AuthProvider = ({ children }) => {
   const adminLogin = async (email, password) => {
     try {
       setError(null);
-      const response = await api.post('/admin/login', {
+      const response = await api.post('/api/admin/login', {
         email,
         password
       });
