@@ -67,11 +67,11 @@ mongoose.connect(process.env.MONGODB_URI)
         // Create default admin after successful connection
         await createDefaultAdmin();
         // Start server
-        const PORT = process.env.PORT || 5000;
+        const PORT = process.env.PORT;
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
-            console.log(`Health check: http://localhost:${PORT}`);
-            console.log(`API endpoints: http://localhost:${PORT}/api`);
+            console.log(`Health check: ${process.env.BACKEND_URL}`);
+            console.log(`API endpoints: ${process.env.BACKEND_URL}/api`);
         });
     })
     .catch((error) => {
