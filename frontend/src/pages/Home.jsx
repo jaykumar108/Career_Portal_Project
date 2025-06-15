@@ -1,16 +1,25 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, Briefcase, Building, MapPin, Users, ArrowRight, Sparkles, Star, TrendingUp, Award } from 'lucide-react';
 
-
 const Home = () => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [location, setLocation] = useState('');
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    // Redirect to jobs page with search parameters
+    navigate(`/jobs?search=${encodeURIComponent(searchTerm)}&location=${encodeURIComponent(location)}`);
+  };
+
   // Featured jobs - normally would come from an API
   const featuredJobs = [
     {
       id: 1,
       title: 'Senior Frontend Developer',
       company: 'TechCorp',
-      location: 'San Francisco, CA',
+      location: 'Bangalore, Karnataka',
       type: 'Full-time',  
       salary: '₹12,00,000 - ₹15,00,000',
       logo: 'https://images.pexels.com/photos/5926393/pexels-photo-5926393.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
@@ -19,16 +28,16 @@ const Home = () => {
       id: 2,
       title: 'Product Manager',
       company: 'InnovateTech',
-      location: 'New York, NY',
+      location: 'Mumbai, Maharashtra',
       type: 'Full-time',
       salary: '₹13,00,000 - ₹16,00,000',
-      logo: 'https://images.pexels.com/photos/15031637/pexels-photo-15031637/free-photo-of-letter-i-in-neon-light.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
+      logo: 'https://images.pexels.com/photos/5926393/pexels-photo-5926393.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
     },
     {
       id: 3,
       title: 'DevOps Engineer',
       company: 'CloudSys',
-      location: 'Remote',
+      location: 'Hyderabad, Telangana',
       type: 'Full-time',
       salary: '₹11,00,000 - ₹14,00,000',
       logo: 'https://images.pexels.com/photos/5926382/pexels-photo-5926382.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
@@ -37,7 +46,7 @@ const Home = () => {
       id: 4,
       title: 'UX/UI Designer',
       company: 'DesignHub',
-      location: 'Austin, TX',
+      location: 'Delhi NCR',
       type: 'Full-time',
       salary: '₹9,00,000 - ₹12,00,000',
       logo: 'https://images.pexels.com/photos/5926389/pexels-photo-5926389.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
@@ -75,13 +84,15 @@ const Home = () => {
             </p>
 
             {/* Search Form */}
-            <div className="mt-12 bg-white/10 backdrop-blur-lg p-2 rounded-2xl shadow-2xl flex flex-col md:flex-row border border-white/20">
+            <form onSubmit={handleSearch} className="mt-12 bg-white/10 backdrop-blur-lg p-2 rounded-2xl shadow-2xl flex flex-col md:flex-row border border-white/20">
               <div className="flex-grow flex items-center px-6 py-4 md:py-0 border-b md:border-b-0 md:border-r border-white/10">
                 <Search className="h-5 w-5 text-blue-200 mr-3" />
                 <input
                   type="text"
                   placeholder="Job title, company, or keywords"
                   className="flex-grow bg-transparent text-white placeholder-blue-200 focus:outline-none"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <div className="flex-grow flex items-center px-6 py-4 md:py-0 border-b md:border-b-0 md:border-r border-white/10">
@@ -90,12 +101,17 @@ const Home = () => {
                   type="text"
                   placeholder="Location"
                   className="flex-grow bg-transparent text-white placeholder-blue-200 focus:outline-none"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
                 />
               </div>
-              <button className="mt-3 md:mt-0 mx-4 md:mx-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-medium transform hover:scale-105">
+              <button 
+                type="submit"
+                className="mt-3 md:mt-0 mx-4 md:mx-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-medium transform hover:scale-105"
+              >
                 Search Jobs
               </button>
-            </div>
+            </form>
 
             <div className="flex flex-wrap justify-center gap-4 text-blue-200 text-sm">
               <span className="flex items-center">

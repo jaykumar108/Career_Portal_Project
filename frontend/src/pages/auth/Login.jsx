@@ -1,37 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, AlertCircle, X, User, Shield } from 'lucide-react';
+import { Mail, Lock, AlertCircle, X, User, Shield, Building } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [formError, setFormError] = useState('');
+  const [isRecruiter, setIsRecruiter] = useState(false);
   const { login, error, loading, user, clearError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get the redirect path from query params or use profile as default
-  const from = location.state?.from?.pathname || 
-              new URLSearchParams(location.search).get('redirect') || '/profile';
+  // Set redirect path based on role
+  const getRedirectPath = (userRole) => {
+    if (userRole === 'recruiter') {
+      return '/recruiter';
+    } else if (userRole === 'user') {
+      return '/profile';
+    }
+    return '/';
+  };
 
   useEffect(() => {
-    // If user is already logged in, redirect
+    // If user is already logged in, redirect based on role
     if (user) {
-      navigate(from, { replace: true });
+      const redirectPath = getRedirectPath(user.role);
+      navigate(redirectPath, { replace: true });
     }
     
     // Set any auth error to form error
     if (error) {
       setFormError(error);
+      toast.error(error);
     }
     
     return () => {
       // Clear any errors when component unmounts
       clearError();
     };
-  }, [user, error, navigate, from, clearError]);
+  }, [user, error, navigate, clearError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,12 +49,30 @@ const Login = () => {
     
     // Basic validation
     if (!email.trim() || !password.trim()) {
-      setFormError('Please enter both email and password');
+      const errorMsg = 'Please enter both email and password';
+      setFormError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
     
-    // Attempt login
-    await login(email, password);
+    try {
+      // Attempt login with appropriate role
+      const userInfo = await login(email, password, isRecruiter ? 'recruiter' : 'user');
+      
+      if (userInfo) {
+        // Check if account is blocked (for recruiters)
+        if (isRecruiter && userInfo.isActive === false) {
+          toast.error("Your account is blocked. Please contact Admin.");
+          return;
+        }
+        
+        // Redirect based on role
+        const redirectPath = getRedirectPath(userInfo.role);
+        navigate(redirectPath, { replace: true });
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
 
   const dismissError = () => {
@@ -57,11 +85,11 @@ const Login = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="bg-blue-600 p-3 rounded-full shadow-lg transform hover:scale-110 transition-all duration-300">
-            <Shield className="h-8 w-8 text-white" />
+            {isRecruiter ? <Building className="h-8 w-8 text-white" /> : <User className="h-8 w-8 text-white" />}
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-          Welcome Back
+          {isRecruiter ? 'Recruiter Login' : 'Welcome Back'}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-400">
           Don't have an account?{' '}
@@ -73,6 +101,36 @@ const Login = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-gray-800/50 backdrop-blur-lg py-8 px-4 shadow-2xl sm:rounded-xl sm:px-10 border border-gray-700/50">
+          {/* Toggle buttons */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex rounded-lg border border-gray-700 bg-gray-800/50 p-1">
+              <button
+                type="button"
+                onClick={() => setIsRecruiter(false)}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                  !isRecruiter
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <User className="h-4 w-4 inline-block mr-2" />
+                Job Seeker
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsRecruiter(true)}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                  isRecruiter
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <Building className="h-4 w-4 inline-block mr-2" />
+                Recruiter
+              </button>
+            </div>
+          </div>
+
           {/* Error message */}
           {formError && (
             <div className="mb-4 bg-red-500/10 border-l-4 border-red-500 p-4 rounded-lg relative animate-fadeIn">
@@ -116,7 +174,7 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 block w-full pr-3 py-3 border border-gray-700 rounded-lg leading-5 bg-gray-900/50 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="you@example.com"
+                  placeholder={isRecruiter ? "you@company.com" : "you@example.com"}
                 />
               </div>
             </div>
@@ -180,7 +238,7 @@ const Login = () => {
                     Signing in...
                   </span>
                 ) : (
-                  'Sign in'
+                  `Sign in as ${isRecruiter ? 'Recruiter' : 'Job Seeker'}`
                 )}
               </button>
             </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, X, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import toast, { Toaster } from 'react-hot-toast';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -15,21 +16,25 @@ const AdminLogin = () => {
   const from = location.state?.from?.pathname || '/admin/dashboard';
 
   useEffect(() => {
-    // If admin is already logged in, redirect
-    if (user && user.role === 'Admin') {
-      navigate(from, { replace: true });
-    }
-    
     // Set any auth error to form error
     if (error) {
       setFormError(error);
+      toast.error('Login failed. Please check your credentials.');
     }
     
     return () => {
       // Clear any errors when component unmounts
       clearError();
     };
-  }, [user, error, navigate, from, clearError]);
+  }, [error, clearError]);
+
+  // Separate effect for navigation
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      toast.success('Welcome back! Successfully logged in.');
+      navigate(from, { replace: true });
+    }
+  }, [user?.role, navigate, from]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,19 +42,20 @@ const AdminLogin = () => {
     
     // Basic validation
     if (!email.trim() || !password.trim()) {
-      setFormError('Please enter both email and password');
+      const errorMsg = 'Please enter both email and password';
+      setFormError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
     
     try {
       // Attempt admin login
-      const admin = await adminLogin(email, password);
-      if (admin && admin.role === 'Admin') {
-        navigate('/admin/dashboard', { replace: true });
-      }
+      await adminLogin(email, password);
     } catch (err) {
-      // Error is handled in AuthContext
       console.error('Login error:', err);
+      const errorMsg = err.message || 'Login failed. Please check your credentials.';
+      setFormError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -60,6 +66,7 @@ const AdminLogin = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <Toaster position="top-right" />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-blue-500/10 backdrop-blur-sm mb-6">
           <Shield className="h-10 w-10 text-blue-400" />

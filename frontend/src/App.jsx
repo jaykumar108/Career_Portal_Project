@@ -13,12 +13,17 @@ import Register from './pages/auth/Register';
 import AdminLogin from './pages/auth/AdminLogin';
 import UserProfile from './pages/UserProfile';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminProfile from './pages/admin/AdminProfile';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
 import PostNewJob from './pages/admin/PostNewJob';
 import ViewApplications from './pages/admin/ViewApplications';
 import ManageUsers from './pages/admin/ManageUsers';
 import ScheduleInterview from './pages/admin/ScheduleInterview';
+import RecruiterDashboard from './components/recruiter/RecruiterDashboard';
+import RecruiterRoute from './components/recruiter/RecruiterRoute';
+import { Toaster } from 'react-hot-toast';
+import AdminLayout from './components/layout/AdminLayout';
 
 // Layout component that includes Navbar and Footer
 const Layout = ({ children }) => {
@@ -35,10 +40,18 @@ const Layout = ({ children }) => {
 
 // Protected Route Component for regular users
 const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
   
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
   
   return children;
@@ -46,10 +59,18 @@ const ProtectedRoute = ({ children }) => {
 
 // Admin Route Component
 const AdminRoute = ({ children }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   
-  if (!user || user.role !== 'Admin') {
-    return <Navigate to="/admin/login" />;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+  
+  if (!user || user.role !== 'admin') {
+    return <Navigate to="/admin/login" replace />;
   }
   
   return children;
@@ -58,7 +79,7 @@ const AdminRoute = ({ children }) => {
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -118,33 +139,52 @@ function App() {
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={
             <AdminRoute>
-              <AdminDashboard />
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
+            </AdminRoute>
+          } />
+          <Route path="/admin/profile" element={
+            <AdminRoute>
+              <AdminLayout>
+                <AdminProfile />
+              </AdminLayout>
             </AdminRoute>
           } />
           <Route path="/admin/post-job" element={
             <AdminRoute>
-              <PostNewJob />
+              <AdminLayout>
+                <PostNewJob />
+              </AdminLayout>
             </AdminRoute>
           } />
           <Route path="/admin/applications" element={
             <AdminRoute>
-              <ViewApplications />
+              <AdminLayout>
+                <ViewApplications />
+              </AdminLayout>
             </AdminRoute>
           } />
           <Route path="/admin/users" element={
             <AdminRoute>
-              <ManageUsers />
+              <AdminLayout>
+                <ManageUsers />
+              </AdminLayout>
             </AdminRoute>
           } />
           <Route path="/admin/schedule-interview" element={
             <AdminRoute>
-              <ScheduleInterview />
+              <AdminLayout>
+                <ScheduleInterview />
+              </AdminLayout>
             </AdminRoute>
           } />
+          <Route element={<RecruiterRoute />}>
+            <Route path="/recruiter/*" element={<RecruiterDashboard />} />
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>
-    
   );
 }
 

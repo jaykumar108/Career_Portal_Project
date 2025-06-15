@@ -1,17 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Search, MapPin, Briefcase, Filter, ChevronDown, X, Building, DollarSign, Clock } from 'lucide-react';
 
 const JobListings = () => {
+  const location = useLocation();
   // State for filters
   const [searchTerm, setSearchTerm] = useState('');
-  const [location, setLocation] = useState('');
+  const [locationSearch, setLocationSearch] = useState('');
   const [jobType, setJobType] = useState([]);
   const [experience, setExperience] = useState([]);
   const [salary, setSalary] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
   const [jobs, setJobs] = useState([]);
+
+  // Handle URL parameters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const search = searchParams.get('search');
+    const locationParam = searchParams.get('location');
+
+    if (search) setSearchTerm(search);
+    if (locationParam) setLocationSearch(locationParam);
+  }, [location.search]);
 
   // Mock job data - in production would be fetched from API
   useEffect(() => {
@@ -158,7 +169,7 @@ const JobListings = () => {
   // Clear all filters
   const clearFilters = () => {
     setSearchTerm('');
-    setLocation('');
+    setLocationSearch('');
     setJobType([]);
     setExperience([]);
     setSalary('');
@@ -170,7 +181,7 @@ const JobListings = () => {
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.company.toLowerCase().includes(searchTerm.toLowerCase())
     ) && (
-      location === '' || job.location.toLowerCase().includes(location.toLowerCase())
+      locationSearch === '' || job.location.toLowerCase().includes(locationSearch.toLowerCase())
     ) && (
       jobType.length === 0 || jobType.includes(job.type)
     ) && (
@@ -207,8 +218,8 @@ const JobListings = () => {
                 type="text"
                 placeholder="Location"
                 className="flex-grow bg-transparent text-gray-800 focus:outline-none"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                value={locationSearch}
+                onChange={(e) => setLocationSearch(e.target.value)}
               />
             </div>
             <button 

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middleware/auth');
+const { auth, checkRole } = require('../middleware/auth');
 const {
   postJob,
   getAllJobs,
@@ -15,9 +15,9 @@ router.get('/', getAllJobs);
 router.get('/:id', getJobById);
 
 // Protected routes (Admin only)
-router.post('/', protect, authorize('Admin'), postJob);
-router.put('/:id', protect, authorize('Admin'), updateJob);
-router.delete('/:id', protect, authorize('Admin'), deleteJob);
-router.get('/admin/jobs', protect, authorize('Admin'), getAdminJobs);
+router.post('/', auth, checkRole(['Admin']), postJob);
+router.put('/:id', auth, checkRole(['Admin']), updateJob);
+router.delete('/:id', auth, checkRole(['Admin']), deleteJob);
+router.get('/admin/jobs', auth, checkRole(['Admin']), getAdminJobs);
 
 module.exports = router; 

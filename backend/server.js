@@ -5,27 +5,27 @@ const cors = require('cors');
 const Admin = require('./models/Admin');
 
 // Import routes
-const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const recruiterRoutes = require('./routes/recruiterRoutes');
+const jobRoutes = require('./routes/jobRoutes');
 
 const app = express();
 
 // CORS configuration
 app.use(cors({
-  origin: true, // Allow all origins
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: process.env.FRONTEND_URL,
+  credentials: true
 }));
 
-// Pre-flight requests
-app.options('*', cors());
-
+// Middleware
 app.use(express.json());
 
 // Routes
-app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/recruiters', recruiterRoutes);
+app.use('/api/jobs', jobRoutes);
 
 // Health check route
 app.get('/', (req, res) => {
@@ -37,7 +37,7 @@ const defaultAdmin = {
     name: 'Jay',
     email: 'jsharma.dbg@gmail.com',
     mobile: '732092964',
-    role: 'Admin',
+    role: 'admin',
     password: 'admin@123'
 };
 
@@ -60,21 +60,28 @@ const createDefaultAdmin = async () => {
     }
 };
 
-// MongoDB Connection
+// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
     .then(async () => {
         console.log('Connected to MongoDB');
         // Create default admin after successful connection
         await createDefaultAdmin();
+        // Start server
+        const PORT = process.env.PORT || 5000;
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+            console.log(`Health check: http://localhost:${PORT}`);
+            console.log(`API endpoints: http://localhost:${PORT}/api`);
+        });
     })
-    .catch((err) => {
-        console.error('MongoDB connection error:', err);
+    .catch((error) => {
+        console.error('MongoDB connection error:', error);
     });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({ error: 'Something went wrong!' });
+    res.status(500).json({ message: 'Something went wrong!' });
 });
 
 // Export for Vercel

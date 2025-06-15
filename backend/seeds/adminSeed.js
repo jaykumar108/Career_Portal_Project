@@ -6,7 +6,7 @@ const defaultAdmin = {
     name: 'Jay',
     email: 'jsharma.dbg@gmail.com',
     mobile: '732092964',
-    role: 'Admin',
+    role: 'admin',
     password: 'admin@123'
 };
 

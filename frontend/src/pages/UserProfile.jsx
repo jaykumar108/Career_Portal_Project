@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { User, Mail, Phone, MapPin, Briefcase, GraduationCap, Award, Edit2, Save, X } from 'lucide-react';
 
@@ -6,20 +6,39 @@ const UserProfile = () => {
   const { user, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    phone: user?.phone || '',
-    address: user?.address || {
+    name: '',
+    phone: '',
+    address: {
       street: '',
       city: '',
       state: '',
       country: '',
       zipCode: ''
     },
-    education: user?.education || [],
-    experience: user?.experience || [],
-    skills: user?.skills || []
+    education: [],
+    experience: [],
+    skills: []
   });
   const [newSkill, setNewSkill] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        phone: user.mobile || '',
+        address: user.address || {
+          street: '',
+          city: '',
+          state: '',
+          country: '',
+          zipCode: ''
+        },
+        education: user.education || [],
+        experience: user.experience || [],
+        skills: user.skills || []
+      });
+    }
+  }, [user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -170,7 +189,7 @@ const UserProfile = () => {
                       </div>
                       <div className="flex items-center space-x-3">
                         <Phone className="h-5 w-5 text-blue-400" />
-                        <span className="text-gray-300">{user?.phone || 'Not provided'}</span>
+                        <span className="text-gray-300">{user?.mobile || 'Not provided'}</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <MapPin className="h-5 w-5 text-blue-400" />
@@ -189,7 +208,7 @@ const UserProfile = () => {
                   <h2 className="text-2xl font-bold text-white mb-6">Skills</h2>
                   {isEditing ? (
                     <div className="space-y-4">
-                      <div className="flex space-x-2">
+                      <div className="flex gap-2">
                         <input
                           type="text"
                           value={newSkill}
@@ -198,6 +217,7 @@ const UserProfile = () => {
                           className="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <button
+                          type="button"
                           onClick={addSkill}
                           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
                         >
@@ -208,10 +228,11 @@ const UserProfile = () => {
                         {formData.skills.map((skill, index) => (
                           <span
                             key={index}
-                            className="bg-blue-600/50 text-white px-3 py-1 rounded-full flex items-center space-x-2"
+                            className="bg-blue-600/50 text-white px-3 py-1 rounded-full flex items-center gap-2"
                           >
-                            <span>{skill}</span>
+                            {skill}
                             <button
+                              type="button"
                               onClick={() => removeSkill(skill)}
                               className="hover:text-red-400 transition-colors duration-200"
                             >
@@ -262,7 +283,7 @@ const UserProfile = () => {
                       </span>
                     </div>
                   </div>
-                </div>  
+                </div>
 
                 <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6">
                   <h2 className="text-2xl font-bold text-white mb-6">Quick Stats</h2>

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { auth, checkRole } = require('../middleware/auth');
 const {
-  signup,
+  registerUser,
   login,
   getProfile,
   updateProfile,
@@ -11,7 +11,7 @@ const {
 } = require('../controllers/userController');
 
 // Public routes
-router.post('/signup', signup);
+router.post('/register', registerUser);
 router.post('/login', login);
 
 // Protected routes

@@ -22,7 +22,8 @@ const auth = async (req, res, next) => {
                 throw new Error();
             }
             req.admin = admin;
-            req.user = admin; // Set admin as user for compatibility
+            admin.role = 'Admin'; // Set role directly on admin object
+            req.user = admin;
             req.isAdmin = true;
         } else {
             req.user = user;

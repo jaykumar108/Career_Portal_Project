@@ -1,7 +1,7 @@
 const Job = require('../models/Job');
 
 // Post a new job
-exports.postJob = async (req, res) => {
+const postJob = async (req, res) => {
   try {
     const {
       title,
@@ -15,6 +15,7 @@ exports.postJob = async (req, res) => {
       skills
     } = req.body;
 
+    // Create new job with postedBy from the authenticated admin
     const job = new Job({
       title,
       company,
@@ -25,7 +26,7 @@ exports.postJob = async (req, res) => {
       requirements,
       deadline,
       skills,
-      postedBy: req.user._id
+      postedBy: req.user._id // This will be set from the auth middleware
     });
 
     await job.save();
@@ -46,7 +47,7 @@ exports.postJob = async (req, res) => {
 };
 
 // Get all jobs
-exports.getAllJobs = async (req, res) => {
+const getAllJobs = async (req, res) => {
   try {
     const jobs = await Job.find()
       .populate('postedBy', 'name email')
@@ -67,7 +68,7 @@ exports.getAllJobs = async (req, res) => {
 };
 
 // Get job by ID
-exports.getJobById = async (req, res) => {
+const getJobById = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id)
       .populate('postedBy', 'name email')
@@ -95,7 +96,7 @@ exports.getJobById = async (req, res) => {
 };
 
 // Update job
-exports.updateJob = async (req, res) => {
+const updateJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
 
@@ -136,7 +137,7 @@ exports.updateJob = async (req, res) => {
 };
 
 // Delete job
-exports.deleteJob = async (req, res) => {
+const deleteJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
 
@@ -155,7 +156,7 @@ exports.deleteJob = async (req, res) => {
       });
     }
 
-    await job.remove();
+    await Job.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,
@@ -172,7 +173,7 @@ exports.deleteJob = async (req, res) => {
 };
 
 // Get jobs posted by admin
-exports.getAdminJobs = async (req, res) => {
+const getAdminJobs = async (req, res) => {
   try {
     const jobs = await Job.find({ postedBy: req.user._id })
       .sort({ createdAt: -1 });
@@ -189,4 +190,13 @@ exports.getAdminJobs = async (req, res) => {
       error: error.message
     });
   }
+};
+
+module.exports = {
+  postJob,
+  getAllJobs,
+  getJobById,
+  updateJob,
+  deleteJob,
+  getAdminJobs
 }; 

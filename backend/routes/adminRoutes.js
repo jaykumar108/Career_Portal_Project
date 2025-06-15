@@ -1,18 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const { registerAdmin, loginAdmin, getAdminProfile } = require('../controllers/adminController');
-const { auth, checkRole } = require('../middleware/auth');
+const { protect, admin } = require('../middleware/authMiddleware');
+const {
+  registerAdmin,
+  loginAdmin,
+  getAdminProfile,
+  getAllUsers,
+  getAllRecruiters,
+  getUsersStats,
+  updateUserStatus,
+  updateRecruiterStatus
+} = require('../controllers/adminController');
 const User = require('../models/User');
+const Recruiter = require('../models/Recruiter');
 
-// Public routes
+
+// Auth routes
 router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
 
-// Protected routes
-router.get('/profile', auth, checkRole(['Admin']), getAdminProfile);
+// Protected admin routes
+router.get('/profile', protect, admin, getAdminProfile);
+router.get('/users', protect, admin, getAllUsers);
+router.get('/recruiters', protect, admin, getAllRecruiters);
+router.get('/users-stats', protect, admin, getUsersStats);
+router.put('/users/:id/status', protect, admin, updateUserStatus);
+router.put('/recruiters/:id/status', protect, admin, updateRecruiterStatus);
 
 // Admin dashboard stats
-router.get('/dashboard', auth, checkRole(['Admin']), async (req, res) => {
+router.get('/dashboard', protect, admin, async (req, res) => {
   try {
     const totalUsers = await User.countDocuments({ role: 'User' });
     const totalAdmins = await User.countDocuments({ role: 'Admin' });
@@ -32,18 +48,8 @@ router.get('/dashboard', auth, checkRole(['Admin']), async (req, res) => {
   }
 });
 
-// Get all users (admin only)
-router.get('/users', auth, checkRole(['Admin']), async (req, res) => {
-  try {
-    const users = await User.find({}).select('-password');
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
 // Get user by ID (admin only)
-router.get('/users/:id', auth, checkRole(['Admin']), async (req, res) => {
+router.get('/users/:id', protect, admin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
     if (!user) {
@@ -56,7 +62,7 @@ router.get('/users/:id', auth, checkRole(['Admin']), async (req, res) => {
 });
 
 // Update user (admin only)
-router.patch('/users/:id', auth, checkRole(['Admin']), async (req, res) => {
+router.patch('/users/:id', protect, admin, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ['name', 'email', 'role', 'isActive', 'phone', 'address'];
   const isValidOperation = updates.every(update => allowedUpdates.includes(update));
@@ -80,7 +86,7 @@ router.patch('/users/:id', auth, checkRole(['Admin']), async (req, res) => {
 });
 
 // Delete user (admin only)
-router.delete('/users/:id', auth, checkRole(['Admin']), async (req, res) => {
+router.delete('/users/:id', protect, admin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {

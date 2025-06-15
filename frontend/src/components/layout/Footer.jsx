@@ -13,8 +13,12 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-6">
             <div className="flex items-center">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <Briefcase className="h-6 w-6 text-white" />
+              <div>
+                <img 
+                  src="/logo.jpg" 
+                  alt="Career Portal Logo" 
+                  className="h-10 w-10 object-contain"
+                />
               </div>
               <span className="ml-3 text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
                 CareerPortal

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Briefcase, Menu, X, User, LogOut, ChevronDown, Search } from 'lucide-react';
+import { Menu, X, User, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
@@ -36,7 +36,7 @@ const Navbar = () => {
   };
 
   const toggleProfile = () => {
-    setIsProfileOpen(!isProfileOpen);
+    setIsProfileOpen(!isProfileOpen); 
   };
 
   const handleLogout = () => {
@@ -59,25 +59,17 @@ const Navbar = () => {
           {/* Logo and brand */}
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center group">
-              <div className="bg-blue-600 p-1.5 rounded-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                <Briefcase className="h-6 w-6 text-white" />
+              <div className="transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                <img 
+                  src="/logo.jpg" 
+                  alt="Career Portal Logo" 
+                  className="h-10 w-10 object-contain"
+                />
               </div>
               <span className="ml-2 text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 CareerPortal
               </span>
             </Link>
-          </div>
-
-          {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Search jobs..."
-                className="w-full px-4 py-1.5 pl-10 text-gray-700 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300"
-              />
-              <Search className="absolute left-3 top-2 h-5 w-5 text-gray-400" />
-            </div>
           </div>
 
           {/* Desktop navigation */}
@@ -179,18 +171,6 @@ const Navbar = () => {
       {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-white shadow-lg overflow-hidden transition-all duration-300 animate-slideDown">
-          {/* Search Bar - Mobile */}
-          <div className="px-4 py-3 border-b border-gray-100">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search jobs..."
-                className="w-full px-4 py-2 pl-10 text-gray-700 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
-              />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            </div>
-          </div>
-
           <div className="px-4 pt-2 pb-3 space-y-1">
             <Link
               to="/"
