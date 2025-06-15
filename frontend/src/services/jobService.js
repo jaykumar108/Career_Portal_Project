@@ -3,7 +3,7 @@ import api from './api';
 // Get all jobs
 export const getAllJobs = async () => {
   try {
-    const response = await api.get('/jobs');
+    const response = await api.get('api/jobs');
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -13,7 +13,7 @@ export const getAllJobs = async () => {
 // Get job by ID
 export const getJobById = async (id) => {
   try {
-    const response = await api.get(`/jobs/${id}`);
+    const response = await api.get(`api/jobs/${id}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -23,7 +23,7 @@ export const getJobById = async (id) => {
 // Post new job
 export const postJob = async (jobData) => {
   try {
-    const response = await api.post('/jobs', jobData);
+    const response = await api.post('api/jobs', jobData);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -33,7 +33,7 @@ export const postJob = async (jobData) => {
 // Update job
 export const updateJob = async (id, jobData) => {
   try {
-    const response = await api.put(`/jobs/${id}`, jobData);
+    const response = await api.put(`api/jobs/${id}`, jobData);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -43,7 +43,7 @@ export const updateJob = async (id, jobData) => {
 // Delete job
 export const deleteJob = async (id) => {
   try {
-    const response = await api.delete(`/jobs/${id}`);
+    const response = await api.delete(`api/jobs/${id}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -53,7 +53,7 @@ export const deleteJob = async (id) => {
 // Get admin jobs
 export const getAdminJobs = async () => {
   try {
-    const response = await api.get('/jobs/admin/jobs');
+    const response = await api.get('api/jobs/admin/jobs');
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
