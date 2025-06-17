@@ -176,49 +176,54 @@ const PostNewJob = () => {
             <span className="text-sm text-gray-500">{jobs.length} jobs posted</span>
           </div>
           <div className="divide-y divide-gray-200">
+            {/* Table header for S.No. */}
+            {Array.isArray(jobs) && jobs.length > 0 && (
+              <div className="flex px-4 py-2 font-semibold text-gray-600 text-xs uppercase bg-gray-50 border-b">
+                <div className="w-12">S.No.</div>
+                <div className="flex-1">Title</div>
+                <div className="w-40">Type</div>
+                <div className="w-40">Status</div>
+                <div className="w-40">Company</div>
+                <div className="w-40">Location</div>
+                <div className="w-32">Salary</div>
+              </div>
+            )}
             {isLoadingJobs ? (
               <div className="p-6 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
                 <p className="mt-2 text-gray-500">Loading jobs...</p>
               </div>
             ) : Array.isArray(jobs) && jobs.length > 0 ? (
-              jobs.map((job) => (
+              jobs.slice().reverse().map((job, idx, arr) => (
                 <div 
                   key={job._id} 
-                  className="p-4 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                  className="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-200 border-b"
                   onClick={() => handleJobClick(job)}
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-medium text-gray-900">{job.title}</h3>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          job.type === 'full-time' ? 'bg-green-100 text-green-800' :
-                          job.type === 'part-time' ? 'bg-blue-100 text-blue-800' :
-                          job.type === 'contract' ? 'bg-purple-100 text-purple-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {job.type}
-                        </span>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          job.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {job.status}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-sm text-gray-600">{job.company}</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-sm text-gray-500">
-                        <MapPin className="h-4 w-4 inline mr-1" />
-                        {job.location}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        <span className="text-gray-500 mr-1">₹</span>
-                        {job.salary}
-                      </div>
-                    </div>
+                  <div className="w-12 font-semibold text-gray-800">{arr.length - idx}</div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-medium text-gray-900">{job.title}</h3>
                   </div>
+                  <div className="w-40">
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      job.type === 'full-time' ? 'bg-green-100 text-green-800' :
+                      job.type === 'part-time' ? 'bg-blue-100 text-blue-800' :
+                      job.type === 'contract' ? 'bg-purple-100 text-purple-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {job.type}
+                    </span>
+                  </div>
+                  <div className="w-40">
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      job.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {job.status}
+                    </span>
+                  </div>
+                  <div className="w-40 text-gray-700">{job.company}</div>
+                  <div className="w-40 text-gray-700">{job.location}</div>
+                  <div className="w-32 text-gray-700">₹{job.salary}</div>
                 </div>
               ))
             ) : (

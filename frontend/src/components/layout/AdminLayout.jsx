@@ -29,7 +29,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       link: '/admin/post-job'
     },
     {
-      title: 'View Applications',
+      title: 'Applications',
       icon: <FileText className="h-5 w-5" />,
       color: 'text-indigo-500',
       link: '/admin/applications'
@@ -39,12 +39,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       icon: <Users className="h-5 w-5" />,
       color: 'text-purple-500',
       link: '/admin/users'
-    },
-    {
-      title: 'Schedule Interview',
-      icon: <Calendar className="h-5 w-5" />,
-      color: 'text-orange-500',
-      link: '/admin/schedule-interview'
     },
     {
       title: 'Profile Settings',

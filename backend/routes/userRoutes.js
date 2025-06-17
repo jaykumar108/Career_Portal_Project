@@ -7,7 +7,8 @@ const {
   getProfile,
   updateProfile,
   changePassword,
-  deactivateAccount
+  deactivateAccount,
+  getUserApplications
 } = require('../controllers/userController');
 
 // Public routes
@@ -19,6 +20,9 @@ router.get('/profile', auth, getProfile);
 router.patch('/profile', auth, updateProfile);
 router.post('/change-password', auth, changePassword);
 router.post('/deactivate', auth, deactivateAccount);
+
+// Get all applications for the logged-in user
+router.get('/applications', auth, getUserApplications);
 
 // Admin only routes
 router.get('/admin/users', auth, checkRole(['Admin']), async (req, res) => {

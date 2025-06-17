@@ -19,7 +19,6 @@ import { useAuth } from './context/AuthContext';
 import PostNewJob from './pages/admin/PostNewJob';
 import ViewApplications from './pages/admin/ViewApplications';
 import ManageUsers from './pages/admin/ManageUsers';
-import ScheduleInterview from './pages/admin/ScheduleInterview';
 import RecruiterDashboard from './components/recruiter/RecruiterDashboard';
 import RecruiterRoute from './components/recruiter/RecruiterRoute';
 import { Toaster } from 'react-hot-toast';
@@ -169,13 +168,6 @@ function App() {
             <AdminRoute>
               <AdminLayout>
                 <ManageUsers />
-              </AdminLayout>
-            </AdminRoute>
-          } />
-          <Route path="/admin/schedule-interview" element={
-            <AdminRoute>
-              <AdminLayout>
-                <ScheduleInterview />
               </AdminLayout>
             </AdminRoute>
           } />

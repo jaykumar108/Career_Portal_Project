@@ -16,7 +16,8 @@ const AdminDashboard = () => {
     totalJobs: 0,
     activeJobs: 0,
     totalUsers: 0,
-    interviewsScheduled: 0
+    interviewsScheduled: 0,
+    totalApplications: 0
   });
 
   useEffect(() => {
@@ -29,14 +30,24 @@ const AdminDashboard = () => {
         // Calculate stats
         const totalJobs = jobs.length;
         const activeJobs = jobs.filter(job => job.status === 'active').length;
-        
+
+        // Fetch users data
+        const usersRes = await api.get('/api/admin/users');
+        const totalUsers = usersRes.data.count || (usersRes.data.data ? usersRes.data.data.length : 0);
+
+        // Fetch applications data
+        const applicationsRes = await api.get('/api/jobs/applications');
+        const totalApplications = applicationsRes.data.applications ? applicationsRes.data.applications.length : 0;
+
         setStats(prevStats => ({
           ...prevStats,
           totalJobs,
-          activeJobs
+          activeJobs,
+          totalUsers,
+          totalApplications
         }));
       } catch (error) {
-        console.error('Error fetching jobs:', error);
+        console.error('Error fetching jobs or users:', error);
       }
     };
 
@@ -45,36 +56,28 @@ const AdminDashboard = () => {
 
   const dashboardStats = [
     {
-      title: 'Total Jobs',
+      title: 'Total Jobs +',
       value: stats.totalJobs.toString(),
-      change: '+12%',
-      trend: 'up',
-      icon: <Briefcase className="h-6 w-6 text-blue-500" />,
+      icon: <img src="https://img.icons8.com/?size=100&id=hNJTTvCAbHcD&format=png&color=000000" alt="Total Jobs" className="h-6 w-6" />,
       color: 'bg-blue-50'
     },
     {
-      title: 'Active Jobs',
+      title: 'Active Jobs +',
       value: stats.activeJobs.toString(),
-      change: '+8%',
-      trend: 'up',
-      icon: <FileText className="h-6 w-6 text-green-500" />,
+      icon: <img src="https://img.icons8.com/?size=100&id=4M1sFtzulw9W&format=png&color=000000" alt="Active Jobs" className="h-6 w-6" />,
       color: 'bg-green-50'
     },
     {
-      title: 'Total Users',
+      title: 'Total Users +',
       value: stats.totalUsers.toString(),
-      change: '-3%',
-      trend: 'down',
-      icon: <Users className="h-6 w-6 text-purple-500" />,
+      icon: <img src="https://img.icons8.com/?size=100&id=TSNPQ4jsav1-&format=png&color=000000" alt="Total Users" className="h-6 w-6" />,
       color: 'bg-purple-50'
     },
     {
-      title: 'Interviews Scheduled',
-      value: stats.interviewsScheduled.toString(),
-      change: '+5%',
-      trend: 'up',
-      icon: <Calendar className="h-6 w-6 text-orange-500" />,
-      color: 'bg-orange-50'
+      title: 'Total Applications',
+      value: stats.totalApplications ? stats.totalApplications.toString() : '0',
+      icon: <img src="https://img.icons8.com/?size=100&id=MLBOGdor0OFY&format=png&color=000000" alt="Total Applications" className="h-6 w-6" />,
+      color: 'bg-yellow-50'
     }
   ];
 
@@ -123,19 +126,6 @@ const AdminDashboard = () => {
               <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user?.name}!</h1>
               <p className="mt-1 text-sm text-gray-500">Here's what's happening with your portal today.</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <Search className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
-              </div>
-              <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <Filter className="h-5 w-5 text-gray-500" />
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -148,16 +138,6 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div className={`p-3 rounded-lg ${stat.color}`}>
                   {stat.icon}
-                </div>
-                <div className={`flex items-center text-sm ${
-                  stat.trend === 'up' ? 'text-green-500' : 'text-red-500'
-                }`}>
-                  {stat.trend === 'up' ? (
-                    <ArrowUpRight className="h-4 w-4 mr-1" />
-                  ) : (
-                    <ArrowDownRight className="h-4 w-4 mr-1" />
-                  )}
-                  {stat.change}
                 </div>
               </div>
               <h3 className="mt-4 text-2xl font-bold text-gray-900">{stat.value}</h3>

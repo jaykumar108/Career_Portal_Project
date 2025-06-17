@@ -22,7 +22,7 @@ const auth = async (req, res, next) => {
                 throw new Error();
             }
             req.admin = admin;
-            admin.role = 'Admin'; // Set role directly on admin object
+            admin.role = 'admin'; // Set role directly on admin object (fix: use lowercase)
             req.user = admin;
             req.isAdmin = true;
         } else {

@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const Application = require('../models/Application');
 
 // Generate JWT Token
 const generateToken = (userId) => {
@@ -205,6 +206,17 @@ const deactivateAccount = async (req, res) => {
   }
 };
 
+// Get all applications for the logged-in user
+const getUserApplications = async (req, res) => {
+  try {
+    const applications = await Application.find({ user: req.user._id })
+      .populate('job');
+    res.json({ applications });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
   signup,
@@ -212,5 +224,6 @@ module.exports = {
   getProfile,
   updateProfile,
   changePassword,
-  deactivateAccount
+  deactivateAccount,
+  getUserApplications
 }; 

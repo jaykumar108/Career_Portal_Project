@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Phone, MapPin, Briefcase, GraduationCap, Award, Edit2, Save, X } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Briefcase, GraduationCap, Award, Edit2, Save, X, Eye } from 'lucide-react';
+import api from '../services/api';
 
 const UserProfile = () => {
   const { user, updateProfile } = useAuth();
@@ -16,10 +17,13 @@ const UserProfile = () => {
       zipCode: ''
     },
     education: [],
-    experience: [],
-    skills: []
+    experience: []
   });
-  const [newSkill, setNewSkill] = useState('');
+  const [applicationsCount, setApplicationsCount] = useState(0);
+  const [showApplicationsModal, setShowApplicationsModal] = useState(false);
+  const [applications, setApplications] = useState([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
+  const [applicationsError, setApplicationsError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -34,11 +38,36 @@ const UserProfile = () => {
           zipCode: ''
         },
         education: user.education || [],
-        experience: user.experience || [],
-        skills: user.skills || []
+        experience: user.experience || []
       });
     }
   }, [user]);
+
+  useEffect(() => {
+    // Fetch user's applied applications count
+    const fetchApplications = async () => {
+      try {
+        const res = await api.get('/api/users/applications');
+        setApplicationsCount(res.data.applications.length || 0);
+      } catch (err) {
+        setApplicationsCount(0);
+      }
+    };
+    fetchApplications();
+  }, []);
+
+  const fetchApplicationsDetails = async () => {
+    setApplicationsLoading(true);
+    setApplicationsError('');
+    try {
+      const res = await api.get('/api/users/applications');
+      setApplications(res.data.applications || []);
+    } catch (err) {
+      setApplicationsError('Failed to fetch applications');
+    } finally {
+      setApplicationsLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -67,23 +96,6 @@ const UserProfile = () => {
     } catch (error) {
       console.error('Profile update failed:', error);
     }
-  };
-
-  const addSkill = () => {
-    if (newSkill.trim() && !formData.skills.includes(newSkill.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        skills: [...prev.skills, newSkill.trim()]
-      }));
-      setNewSkill('');
-    }
-  };
-
-  const removeSkill = (skillToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      skills: prev.skills.filter(skill => skill !== skillToRemove)
-    }));
   };
 
   return (
@@ -202,59 +214,6 @@ const UserProfile = () => {
                     </div>
                   )}
                 </div>
-
-                {/* Skills Section */}
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">Skills</h2>
-                  {isEditing ? (
-                    <div className="space-y-4">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newSkill}
-                          onChange={(e) => setNewSkill(e.target.value)}
-                          placeholder="Add a skill"
-                          className="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                        <button
-                          type="button"
-                          onClick={addSkill}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
-                        >
-                          Add
-                        </button>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.skills.map((skill, index) => (
-                          <span
-                            key={index}
-                            className="bg-blue-600/50 text-white px-3 py-1 rounded-full flex items-center gap-2"
-                          >
-                            {skill}
-                            <button
-                              type="button"
-                              onClick={() => removeSkill(skill)}
-                              className="hover:text-red-400 transition-colors duration-200"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {user?.skills?.map((skill, index) => (
-                        <span
-                          key={index}
-                          className="bg-blue-600/50 text-white px-3 py-1 rounded-full"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
               </div>
 
               {/* Right Column - Stats & Role */}
@@ -287,14 +246,16 @@ const UserProfile = () => {
 
                 <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6">
                   <h2 className="text-2xl font-bold text-white mb-6">Quick Stats</h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-blue-600/20 rounded-lg p-4">
-                      <div className="text-2xl font-bold text-white">0</div>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="bg-blue-600/20 rounded-lg p-4 flex flex-col items-center">
+                      <div className="text-2xl font-bold text-white">{applicationsCount}</div>
                       <div className="text-sm text-gray-300">Applications</div>
-                    </div>
-                    <div className="bg-blue-600/20 rounded-lg p-4">
-                      <div className="text-2xl font-bold text-white">0</div>
-                      <div className="text-sm text-gray-300">Interviews</div>
+                      <button
+                        className="mt-2 flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200 text-xs"
+                        onClick={() => { setShowApplicationsModal(true); fetchApplicationsDetails(); }}
+                      >
+                        <Eye className="h-4 w-4 mr-1" /> View Applied Applications
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -303,6 +264,61 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Applications Modal */}
+      {showApplicationsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full p-6 relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+              onClick={() => setShowApplicationsModal(false)}
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Applied Applications</h2>
+            {applicationsLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+            ) : applicationsError ? (
+              <div className="text-center text-red-500 py-4">{applicationsError}</div>
+            ) : applications.length === 0 ? (
+              <div className="text-center text-gray-500 py-4">No applications found.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Job Title</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Company</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Applied On</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {applications.map((app) => (
+                      <tr key={app._id}>
+                        <td className="px-4 py-2 text-gray-900">{app.job?.title || '-'}</td>
+                        <td className="px-4 py-2 text-gray-900">{app.job?.company || '-'}</td>
+                        <td className="px-4 py-2 text-gray-700">{app.appliedAt ? new Date(app.appliedAt).toLocaleDateString() : '-'}</td>
+                        <td className="px-4 py-2">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                            app.status === 'approved' ? 'bg-green-100 text-green-700' :
+                            app.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

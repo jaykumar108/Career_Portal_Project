@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Briefcase, Building, MapPin, Upload, Check, X, AlertCircle, ArrowLeft, Linkedin, Github, FileText, DollarSign, Clock, Mail, Phone, User } from 'lucide-react';
+import { Briefcase, Building, MapPin, Upload, Check, X, AlertCircle, ArrowLeft, Linkedin, Github, FileText, DollarSign, Clock, Mail, Phone, User, IndianRupee } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
+import { getJobById } from '../services/jobService';
 
 const ApplyForm = () => {
   const { id } = useParams();
@@ -28,21 +30,30 @@ const ApplyForm = () => {
     agreeToTerms: false
   });
 
-  // Simulating job data fetch from API
+  // Fetch job data from API
   useEffect(() => {
-    setTimeout(() => {
-      const mockJob = {
-        id: parseInt(id),
-        title: 'Senior Frontend Developer',
-        company: 'TechCorp',
-        location: 'San Francisco, CA',
-        type: 'Full-time',
-        logo: 'https://images.pexels.com/photos/5926393/pexels-photo-5926393.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-      };
-      
-      setJob(mockJob);
-      setLoading(false);
-    }, 300);
+    setLoading(true);
+    getJobById(id)
+      .then((data) => {
+        if (data && data.job) {
+          const job = data.job;
+          setJob({
+            id: job._id,
+            title: job.title,
+            company: job.company,
+            location: job.location,
+            type: job.type ? job.type.charAt(0).toUpperCase() + job.type.slice(1) : '',
+            logo: job.company?.logo || 'https://img.icons8.com/?size=100&id=23314&format=png&color=000000',
+          });
+        } else {
+          setJob(null);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setJob(null);
+        setLoading(false);
+      });
   }, [id]);
 
   const handleInputChange = (e) => {
@@ -96,19 +107,30 @@ const ApplyForm = () => {
     setError(null);
     setSubmitting(true);
     
-    // Simulate API submission
     try {
-      // In a real app, would use FormData to send the file
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      const data = new FormData();
+      data.append('jobId', id);
+      data.append('fullName', formData.fullName);
+      data.append('email', formData.email);
+      data.append('phone', formData.phone);
+      data.append('linkedinProfile', formData.linkedinProfile);
+      data.append('portfolioUrl', formData.portfolioUrl);
+      data.append('noticePeriod', formData.noticePeriod);
+      data.append('currentSalary', formData.currentSalary);
+      data.append('expectedSalary', formData.expectedSalary);
+      data.append('coverLetter', formData.coverLetter);
+      data.append('resume', formData.resume);
+      // Send POST request
+      await api.post('api/jobs/apply/upload', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       setSuccess(true);
       window.scrollTo(0, 0);
-      
-      // Redirect after a delay
       setTimeout(() => {
         navigate('/profile');
       }, 3000);
-      
     } catch (err) {
       setError('There was an error submitting your application. Please try again.');
     } finally {
@@ -377,17 +399,17 @@ const ApplyForm = () => {
               
               <div className="relative">
                 <label htmlFor="currentSalary" className="block text-sm font-medium text-gray-300 mb-1">
-                  Current Salary (USD)
+                  Current Salary (INR)
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <IndianRupee className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
                     id="currentSalary"
                     name="currentSalary"
                     value={formData.currentSalary}
                     onChange={handleInputChange}
-                    placeholder="e.g. 75,000"
+                    placeholder="e.g. 45,000"
                     className="block w-full pl-10 bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -395,17 +417,17 @@ const ApplyForm = () => {
               
               <div className="relative">
                 <label htmlFor="expectedSalary" className="block text-sm font-medium text-gray-300 mb-1">
-                  Expected Salary (USD)
+                  Expected Salary (INR)
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <IndianRupee className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
                     id="expectedSalary"
                     name="expectedSalary"
                     value={formData.expectedSalary}
                     onChange={handleInputChange}
-                    placeholder="e.g. 85,000"
+                    placeholder="e.g. 50,000"
                     className="block w-full pl-10 bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>

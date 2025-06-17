@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
-  Briefcase, MapPin, DollarSign, Clock, Building, Calendar, Share2, 
+  Briefcase, MapPin, IndianRupee, Clock, Building, Calendar, Share2, 
   Bookmark, BookmarkCheck, Check, ChevronDown, ChevronUp, Users, Award
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getJobById } from '../services/jobService';
 
 const JobDetails = () => {
   const { id } = useParams();
@@ -13,63 +14,42 @@ const JobDetails = () => {
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Fetch job details - in production would fetch from API
+  // Fetch job details from API
   useEffect(() => {
-    // Simulate API fetch
-    setTimeout(() => {
-      // Mock data for a specific job
-      const mockJob = {
-        id: parseInt(id),
-        title: 'Senior Frontend Developer',
-        company: 'TechCorp',
-        location: 'San Francisco, CA (Remote Option Available)',
-        type: 'Full-time',
-        experience: '3-5 years',
-        salary: '$120,000 - $150,000',
-        posted: '2 days ago',
-        deadline: 'Apr 30, 2025',
-        logo: 'https://images.pexels.com/photos/5926393/pexels-photo-5926393.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2',
-        companyInfo: 'TechCorp is a leading technology company focused on innovative solutions for enterprises. With over 500 employees worldwide, we create products that transform how businesses operate.',
-        description: `<p class="mb-4">We are looking for a Senior Frontend Developer to join our team and help build beautiful, responsive web applications. The ideal candidate is passionate about creating exceptional user experiences and stays current with the latest frontend technologies.</p>
-        <p class="mb-4">As a Senior Frontend Developer, you will collaborate with designers, backend developers, and product managers to implement new features and improve existing functionality. You will have the opportunity to mentor junior developers and contribute to architectural decisions.</p>
-        <h3 class="text-lg font-semibold mb-2 mt-4">Responsibilities:</h3>
-        <ul class="list-disc pl-5 mb-4 space-y-1">
-          <li>Develop new user-facing features using React.js and modern frontend tools</li>
-          <li>Build reusable components and libraries for future use</li>
-          <li>Optimize applications for maximum speed and scalability</li>
-          <li>Collaborate with the design team to implement pixel-perfect UI</li>
-          <li>Mentor junior developers and review code</li>
-          <li>Stay up-to-date with emerging trends and technologies</li>
-        </ul>
-        <h3 class="text-lg font-semibold mb-2 mt-4">Requirements:</h3>
-        <ul class="list-disc pl-5 mb-4 space-y-1">
-          <li>3-5 years of experience with frontend development</li>
-          <li>Strong proficiency in JavaScript, HTML, CSS, and React.js</li>
-          <li>Experience with responsive design and cross-browser compatibility</li>
-          <li>Familiarity with RESTful APIs and modern frontend build pipelines</li>
-          <li>Understanding of CSS preprocessors (Sass, Less)</li>
-          <li>Knowledge of state management (Redux, Context API)</li>
-          <li>Excellent problem-solving and communication skills</li>
-        </ul>
-        <h3 class="text-lg font-semibold mb-2 mt-4">Benefits:</h3>
-        <ul class="list-disc pl-5 mb-4 space-y-1">
-          <li>Competitive salary and equity package</li>
-          <li>Comprehensive health, dental, and vision insurance</li>
-          <li>Flexible work hours and remote work options</li>
-          <li>Professional development budget</li>
-          <li>Regular team events and activities</li>
-          <li>Modern equipment and software licenses</li>
-          <li>401(k) matching program</li>
-        </ul>`,
-        skills: ['JavaScript', 'React.js', 'HTML5', 'CSS3', 'Redux', 'Responsive Design', 'REST APIs', 'Webpack'],
-        applications: 42,
-        vacancies: 2
-      };
-      
-      setJob(mockJob);
-      setLoading(false);
-    }, 500);
+    setLoading(true);
+    setError(null);
+    getJobById(id)
+      .then((data) => {
+        if (data && data.job) {
+          const job = data.job;
+          setJob({
+            id: job._id,
+            title: job.title,
+            company: job.company,
+            location: job.location,
+            type: job.type ? job.type.charAt(0).toUpperCase() + job.type.slice(1) : '',
+            experience: job.requirements || '', // Adjust if you have a separate experience field
+            salary: job.salary,
+            posted: job.createdAt ? new Date(job.createdAt).toLocaleDateString() : '',
+            deadline: job.deadline ? new Date(job.deadline).toLocaleDateString() : '',
+            logo: 'https://images.pexels.com/photos/5926393/pexels-photo-5926393.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2', // Placeholder
+            companyInfo: job.companyInfo || 'No company info available.',
+            description: job.description ? `<p>${job.description}</p>` : '<p>No description available.</p>',
+            skills: job.skills && job.skills.length > 0 ? job.skills : ['N/A'],
+            applications: job.applications ? job.applications.length : 0,
+            vacancies: job.vacancies || 1
+          });
+        } else {
+          setJob(null);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError('Failed to fetch job details.');
+        setLoading(false);
+      });
   }, [id]);
 
   const toggleBookmark = () => {
@@ -99,6 +79,27 @@ const JobDetails = () => {
     return (
       <div className="flex justify-center items-center py-20">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-red-600">{error}</h3>
+          <p className="mt-2 text-sm text-gray-500">Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-600">Job not found.</h3>
+        </div>
       </div>
     );
   }
@@ -146,7 +147,7 @@ const JobDetails = () => {
                     {job.type}
                   </div>
                   <div className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
-                    <DollarSign className="h-4 w-4 mr-1 text-green-500" />
+                    <IndianRupee className="h-4 w-4 mr-1 text-green-500" />
                     {job.salary}
                   </div>
                   <div className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">
@@ -156,26 +157,12 @@ const JobDetails = () => {
                 </div>
               </div>
               <div className="mt-6 sm:mt-0 flex sm:flex-col items-center gap-3">
-                <button
-                  onClick={toggleBookmark} 
-                  className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium ${
-                    bookmarked 
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200' 
-                      : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'
-                  } transition-colors duration-200`}
+                <Link
+                  to={`/apply/${job.id}`}
+                  className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium bg-blue-600 text-white border border-blue-700 hover:bg-blue-700 transition-colors duration-200"
                 >
-                  {bookmarked ? (
-                    <>
-                      <BookmarkCheck className="h-4 w-4 mr-2" />
-                      Saved
-                    </>
-                  ) : (
-                    <>
-                      <Bookmark className="h-4 w-4 mr-2" />
-                      Save
-                    </>
-                  )}
-                </button>
+                  Apply Now
+                </Link>
                 <button
                   onClick={shareJob}
                   className="inline-flex items-center px-4 py-2 bg-gray-50 text-gray-700 rounded-md text-sm font-medium border border-gray-200 hover:bg-gray-100 transition-colors duration-200"
@@ -285,7 +272,7 @@ const JobDetails = () => {
                   </div>
                 </li>
                 <li className="flex">
-                  <DollarSign className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
+                  <IndianRupee className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
                   <div>
                     <div className="text-sm text-gray-500">Salary</div>
                     <div className="font-medium">{job.salary}</div>
@@ -348,30 +335,6 @@ const JobDetails = () => {
                   </p>
                 </>
               )}
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Similar Jobs</h3>
-              <div className="space-y-4">
-                {[1, 2, 3].map((item) => (
-                  <Link key={item} to={`/jobs/${item}`} className="block group">
-                    <div className="flex items-start">
-                      <div className="bg-gray-100 rounded-md w-10 h-10 flex items-center justify-center mr-3 flex-shrink-0">
-                        <Briefcase className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
-                          {['Frontend Developer', 'UI Developer', 'React Developer'][item - 1]}
-                        </h4>
-                        <p className="text-sm text-gray-500">TechCorp</p>
-                        <div className="text-sm text-blue-600 mt-1">
-                          $90,000 - $120,000
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
             </div>
           </div>
         </div>

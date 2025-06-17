@@ -12,6 +12,7 @@
     "dev:full": "concurrently \"npm run dev\" \"npm run server\""
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.50.0",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
     "concurrently": "^8.2.2",

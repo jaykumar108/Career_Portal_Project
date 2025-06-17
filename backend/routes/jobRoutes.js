@@ -7,17 +7,32 @@ const {
   getJobById,
   updateJob,
   deleteJob,
-  getAdminJobs
+  getAdminJobs,
+  uploadResume,
+  getAllApplications,
+  updateApplicationStatus
 } = require('../controllers/jobController');
+const upload = require('../middleware/upload');
 
 // Public routes
 router.get('/', getAllJobs);
-router.get('/:id', getJobById);
+
+// Admin-only: Get all applications
+router.get('/applications', auth, checkRole(['admin']), getAllApplications);
+
+// Admin-only: Update application status
+router.patch('/applications/:id/status', auth, checkRole(['admin']), updateApplicationStatus);
 
 // Protected routes (Admin only)
-router.post('/', auth, checkRole(['Admin']), postJob);
-router.put('/:id', auth, checkRole(['Admin']), updateJob);
-router.delete('/:id', auth, checkRole(['Admin']), deleteJob);
-router.get('/admin/jobs', auth, checkRole(['Admin']), getAdminJobs);
+router.post('/', auth, checkRole(['admin']), postJob);
+router.put('/:id', auth, checkRole(['admin']), updateJob);
+router.delete('/:id', auth, checkRole(['admin']), deleteJob);
+router.get('/admin/jobs', auth, checkRole(['admin']), getAdminJobs);
 
-module.exports = router; 
+// Resume upload route
+router.post('/apply/upload', auth, upload.single('resume'), uploadResume);
+
+// Protected routes (Admin only)
+router.get('/:id', getJobById);
+
+module.exports = router;  

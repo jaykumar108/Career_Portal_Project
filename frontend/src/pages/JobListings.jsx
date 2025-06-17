@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, MapPin, Briefcase, Filter, ChevronDown, X, Building, DollarSign, Clock } from 'lucide-react';
+import { Search, MapPin, Briefcase, Filter, ChevronDown, X, Building, IndianRupee, Clock } from 'lucide-react';
+import { getAllJobs } from '../services/jobService';
 
 const JobListings = () => {
   const location = useLocation();
@@ -13,6 +14,7 @@ const JobListings = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
   const [jobs, setJobs] = useState([]);
+  const [error, setError] = useState(null);
 
   // Handle URL parameters
   useEffect(() => {
@@ -24,112 +26,37 @@ const JobListings = () => {
     if (locationParam) setLocationSearch(locationParam);
   }, [location.search]);
 
-  // Mock job data - in production would be fetched from API
+  // Fetch jobs from API
   useEffect(() => {
-    const mockJobs = [
-      {
-        id: 1,
-        title: 'Senior Frontend Developer',
-        company: 'TechCorp',
-        location: 'Bangalore, Karnataka',
-        type: 'Full-time',
-        experience: '3-5 years',
-        salary: '₹12,00,000 - ₹15,00,000',
-        description: 'We are looking for a Senior Frontend Developer to join our team...',
-        posted: '2 days ago',
-        logo: 'https://images.pexels.com/photos/5926393/pexels-photo-5926393.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-      },
-      {
-        id: 2,
-        title: 'Product Manager',
-        company: 'InnovateTech',
-        location: 'Mumbai, Maharashtra',
-        type: 'Full-time',
-        experience: '5+ years',
-        salary: '₹13,00,000 - ₹16,00,000',
-        description: 'Exciting opportunity for a Product Manager to lead our product development...',
-        posted: '1 day ago',
-        logo: 'https://images.pexels.com/photos/15031637/pexels-photo-15031637/free-photo-of-letter-i-in-neon-light.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-      },
-      {
-        id: 3,
-        title: 'DevOps Engineer',
-        company: 'CloudSys',
-        location: 'Remote',
-        type: 'Full-time',
-        experience: '2-4 years',
-        salary: '₹11,00,000 - ₹14,00,000',
-        description: 'Join our DevOps team to help build and maintain our cloud infrastructure...',
-        posted: '3 days ago',
-        logo: 'https://images.pexels.com/photos/5926382/pexels-photo-5926382.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-      },
-      {
-        id: 4,
-        title: 'UX/UI Designer',
-        company: 'DesignHub',
-        location: 'Hyderabad, Telangana',
-        type: 'Full-time',
-        experience: '2-5 years',
-        salary: '₹9,00,000 - ₹12,00,000',
-        description: 'Looking for a talented UX/UI Designer to create beautiful, intuitive interfaces...',
-        posted: '1 week ago',
-        logo: 'https://images.pexels.com/photos/5926389/pexels-photo-5926389.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-      },
-      {
-        id: 5,
-        title: 'Backend Developer',
-        company: 'DataFlow',
-        location: 'Delhi NCR',
-        type: 'Full-time',
-        experience: '3-6 years',
-        salary: '₹11,50,000 - ₹14,50,000',
-        description: 'Join our backend team to develop scalable and efficient APIs...',
-        posted: '4 days ago',
-        logo: 'https://images.pexels.com/photos/5926386/pexels-photo-5926386.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-      },
-      {
-        id: 6,
-        title: 'Marketing Specialist',
-        company: 'GrowthBoost',
-        location: 'Remote',
-        type: 'Part-time',
-        experience: '1-3 years',
-        salary: '₹6,00,000 - ₹7,50,000',
-        description: 'Looking for a Marketing Specialist to help grow our online presence...',
-        posted: '2 weeks ago',
-        logo: 'https://images.pexels.com/photos/5473955/pexels-photo-5473955.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-      },
-      {
-        id: 7,
-        title: 'Data Scientist',
-        company: 'AnalyticsPro',
-        location: 'Pune, Maharashtra',
-        type: 'Full-time',
-        experience: '3-5 years',
-        salary: '₹13,00,000 - ₹16,00,000',
-        description: 'Join our data science team to analyze complex datasets and build predictive models...',
-        posted: '5 days ago',
-        logo: 'https://images.pexels.com/photos/5474295/pexels-photo-5474295.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-      },
-      {
-        id: 8,
-        title: 'Customer Support Specialist',
-        company: 'ServiceFirst',
-        location: 'Chennai, Tamil Nadu',
-        type: 'Full-time',
-        experience: '0-2 years',
-        salary: '₹4,50,000 - ₹6,00,000',
-        description: 'We are looking for a Customer Support Specialist to assist our clients...',
-        posted: '1 week ago',
-        logo: 'https://images.pexels.com/photos/5926397/pexels-photo-5926397.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-      }
-    ];
-
-    // Simulate API fetch
-    setTimeout(() => {
-      setJobs(mockJobs);
-      setLoading(false);
-    }, 500);
+    setLoading(true);
+    setError(null);
+    getAllJobs()
+      .then((data) => {
+        if (data && data.jobs) {
+          // Map API jobs to UI format if needed
+          setJobs(
+            data.jobs.map(job => ({
+              id: job._id,
+              title: job.title,
+              company: job.company,
+              location: job.location,
+              type: job.type.charAt(0).toUpperCase() + job.type.slice(1),
+              experience: job.requirements || '', // Adjust if you have a separate experience field
+              salary: job.salary,
+              description: job.description,
+              posted: job.createdAt ? new Date(job.createdAt).toLocaleDateString() : '',
+              logo: 'https://images.pexels.com/photos/5926393/pexels-photo-5926393.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2' // Placeholder, update if you have logo in API
+            }))
+          );
+        } else {
+          setJobs([]);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError('Failed to fetch jobs.');
+        setLoading(false);
+      });
   }, []);
 
   // Filter options
@@ -328,6 +255,11 @@ const JobListings = () => {
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
+        ) : error ? (
+          <div className="text-center py-10 bg-white rounded-lg shadow-sm">
+            <h3 className="mt-3 text-lg font-medium text-red-600">{error}</h3>
+            <p className="mt-2 text-sm text-gray-500">Please try again later.</p>
+          </div>
         ) : (
           <div className="space-y-4">
             {filteredJobs.length > 0 ? (
@@ -339,7 +271,7 @@ const JobListings = () => {
                   <div className="p-6">
                     <div className="flex items-start">
                       <img 
-                        src={job.logo}
+                        src={job.company?.logo || 'https://img.icons8.com/?size=100&id=S4PrpPPYz9yh&format=png&color=000000'}
                         alt={job.company}
                         className="h-12 w-12 rounded-md object-cover mr-4 border border-gray-200"
                       />
@@ -371,7 +303,7 @@ const JobListings = () => {
                             {job.experience}
                           </div>
                           <div className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
-                            <DollarSign className="h-3 w-3 mr-1" />
+                            <IndianRupee className="h-3 w-3 mr-1" />
                             {job.salary}
                           </div>
                         </div>

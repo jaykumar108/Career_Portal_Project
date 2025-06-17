@@ -1,57 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Briefcase, Building, MapPin, Users, ArrowRight, Sparkles, Star, TrendingUp, Award } from 'lucide-react';
+import api from '../services/api';
+
 
 const Home = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
+  const [featuredJobs, setFeaturedJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeaturedJobs = async () => {
+      try {
+        const response = await api.get('api/jobs?limit=4');
+        // Check if response.data.jobs exists, else fallback to []
+        setFeaturedJobs(Array.isArray(response.data.jobs) ? response.data.jobs : []);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching featured jobs:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedJobs();
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
     // Redirect to jobs page with search parameters
     navigate(`/jobs?search=${encodeURIComponent(searchTerm)}&location=${encodeURIComponent(location)}`);
   };
-
-  // Featured jobs - normally would come from an API
-  const featuredJobs = [
-    {
-      id: 1,
-      title: 'Senior Frontend Developer',
-      company: 'TechCorp',
-      location: 'Bangalore, Karnataka',
-      type: 'Full-time',  
-      salary: '₹12,00,000 - ₹15,00,000',
-      logo: 'https://images.pexels.com/photos/5926393/pexels-photo-5926393.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-    },
-    {
-      id: 2,
-      title: 'Product Manager',
-      company: 'InnovateTech',
-      location: 'Mumbai, Maharashtra',
-      type: 'Full-time',
-      salary: '₹13,00,000 - ₹16,00,000',
-      logo: 'https://images.pexels.com/photos/5926393/pexels-photo-5926393.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-    },
-    {
-      id: 3,
-      title: 'DevOps Engineer',
-      company: 'CloudSys',
-      location: 'Hyderabad, Telangana',
-      type: 'Full-time',
-      salary: '₹11,00,000 - ₹14,00,000',
-      logo: 'https://images.pexels.com/photos/5926382/pexels-photo-5926382.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-    },
-    {
-      id: 4,
-      title: 'UX/UI Designer',
-      company: 'DesignHub',
-      location: 'Delhi NCR',
-      type: 'Full-time',
-      salary: '₹9,00,000 - ₹12,00,000',
-      logo: 'https://images.pexels.com/photos/5926389/pexels-photo-5926389.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=2'
-    }
-  ];
 
   // Popular categories
   const categories = [
@@ -146,49 +126,56 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredJobs.map(job => (
-              <div 
-                key={job.id} 
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-              >
-                <div className="p-6">
-                  <div className="flex items-start">
-                    <img 
-                      src={job.logo} 
-                      alt={job.company} 
-                      className="h-14 w-14 rounded-xl object-cover mr-4 border border-gray-100 shadow-sm"
-                    />
-                    <div>
-                      <h3 className="font-semibold text-lg text-gray-900">{job.title}</h3>
-                      <p className="text-blue-600 font-medium">{job.company}</p>
+          {loading ? (
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading featured jobs...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {featuredJobs.map(job => (
+                <div 
+                  key={job._id} 
+                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div className="p-6">
+                    <div className="flex items-start">
+                      <img 
+                        src={job.company?.logo || 'https://img.icons8.com/?size=100&id=23314&format=png&color=000000'} 
+                        alt={job.company?.name} 
+                        className="h-14 w-14 rounded-xl object-cover mr-4 border border-gray-100 shadow-sm"
+                      />
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-900">{job.title}</h3>
+                        <p className="text-blue-600 font-medium">{job.company?.name}</p>
+                      </div>
                     </div>
+                    
+                    <div className="mt-6 space-y-3">
+                      <div className="flex items-center text-gray-600">
+                        <MapPin className="h-4 w-4 mr-2 text-blue-500" />
+                        <span className="text-sm">{job.location}</span>
+                      </div>
+                      <div className="flex items-center text-gray-600">
+                        <Briefcase className="h-4 w-4 mr-2 text-blue-500" />
+                        <span className="text-sm">{job.type}</span>
+                      </div>
+                      <div className="text-gray-700 font-medium">
+                        {job.salary}
+                      </div>
+                    </div>
+                    
+                    <Link 
+                      to={`/jobs/${job._id}`}
+                      className="mt-6 block w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-center py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-medium"
+                    >
+                      View Details
+                    </Link>
                   </div>
-                  
-                  <div className="mt-6 space-y-3">
-                    <div className="flex items-center text-gray-600">
-                      <MapPin className="h-4 w-4 mr-2 text-blue-500" />
-                      <span className="text-sm">{job.location}</span>
-                    </div>
-                    <div className="flex items-center text-gray-600">
-                      <Briefcase className="h-4 w-4 mr-2 text-blue-500" />
-                      <span className="text-sm">{job.type}</span>
-                    </div>
-                    <div className="text-gray-700 font-medium">
-                      {job.salary}
-                    </div>
-                  </div>
-                  
-                  <Link 
-                    to={`/jobs/${job.id}`}
-                    className="mt-6 block w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-center py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-medium"
-                  >
-                    View Details
-                  </Link>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-12">
             <Link 
@@ -217,6 +204,7 @@ const Home = () => {
               <div 
                 key={index}
                 className="flex items-center p-6 bg-gray-50 rounded-2xl hover:bg-blue-50 hover:shadow-lg transition-all duration-300 cursor-pointer group transform hover:-translate-y-1"
+                onClick={() => navigate('/jobs')}
               >
                 <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-xl text-white group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-300">
                   {category.icon}
@@ -242,15 +230,29 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
-            {[...Array(6)].map((_, index) => (
-              <div 
-                key={index}
-                className="flex justify-center items-center p-8 bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-              >
-                <Building className="h-14 w-14 text-blue-500" />
-              </div>
-            ))}
+          {/* Marquee effect for company logos */}
+          <div className="relative overflow-x-hidden">
+            <div className="flex gap-8 animate-marquee whitespace-nowrap">
+              {[...Array(12)].map((_, index) => (
+                <div key={index} className="flex-shrink-0 flex justify-center items-center p-8 bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all duration-300 w-48 h-36">
+                  <img 
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-nuBzsGwqhxuMohWpYeHlzozjgdgH-rquGw&s" 
+                    alt="Company Logo"
+                    className="h-14 w-14 object-cover rounded-xl border border-gray-200 shadow-sm"
+                  />
+                </div>
+              ))}
+              {/* Duplicate for seamless loop */}
+              {[...Array(12)].map((_, index) => (
+                <div key={index+100} className="flex-shrink-0 flex justify-center items-center p-8 bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all duration-300 w-48 h-36">
+                  <img 
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-nuBzsGwqhxuMohWpYeHlzozjgdgH-rquGw&s" 
+                    alt="Company Logo"
+                    className="h-14 w-14 object-cover rounded-xl border border-gray-200 shadow-sm"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
