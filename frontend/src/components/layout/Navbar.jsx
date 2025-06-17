@@ -193,6 +193,7 @@ const Navbar = () => {
                   : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
+              
               <span className="flex-1">Jobs</span>
               {location.pathname === '/jobs' && (
                 <div className="h-1.5 w-1.5 rounded-full bg-blue-600"></div>
