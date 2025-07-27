@@ -36,8 +36,8 @@ app.get('/', (req, res) => {
 // Default Admin Data
 const defaultAdmin = {
     name: 'Jay',
-    email: 'jsharma.dbg@gmail.com',
-    mobile: '732092964',
+    email: 'admin@example.com',
+    mobile: '0987654321',
     role: 'admin',
     password: 'admin@123'
 };
